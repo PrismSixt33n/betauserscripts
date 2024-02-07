@@ -183,6 +183,7 @@ extendedInput.addEventListener('change', function() {
 
 sonarrSettings.appendChild(extendedInput);
 sonarrSettings.appendChild(document.createElement('br'));
+sonarrSettings.appendChild(document.createElement('br'));
 sonarrSettings.appendChild(confirmButton);
 sonarrSettings.appendChild(document.createElement('br'));
 
@@ -443,6 +444,7 @@ function createSonarrPanel(result) {
     var headDiv = document.createElement('div');
     headDiv.className = 'head';
     headDiv.textContent = 'Add To Sonarr';
+    headDiv.style.fontSize = '0.7rem';
     headDiv.style.fontWeight = 'bold';
     var sonarrPanelDiv = document.createElement('div');
     sonarrPanelDiv.id = 'SonarrPanel';
