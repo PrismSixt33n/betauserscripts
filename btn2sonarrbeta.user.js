@@ -440,7 +440,9 @@ var confirmButton;
 
 function createSonarrPanel(result) {
     var settings = ['Path', 'Profile', 'Monitor'];
-    var mainColumn = document.querySelector("#content > div.thin > div.main_column");
+    var torrentTables = document.querySelectorAll(".torrent_table#discog_table");
+    var lastTorrentTable = torrentTables[torrentTables.length - 1];
+
     var boxDiv = document.createElement('div');
     boxDiv.className = 'box';
     var headDiv = document.createElement('div');
@@ -478,7 +480,7 @@ function createSonarrPanel(result) {
 
     boxDiv.appendChild(headDiv);
     boxDiv.appendChild(sonarrPanelDiv);
-    mainColumn.insertBefore(boxDiv, mainColumn.children[2]);
+    lastTorrentTable.parentNode.insertBefore(boxDiv, lastTorrentTable.nextSibling);
 
     rootProfileSpanelChoice();
     panelProfileIdChoice();
@@ -594,7 +596,7 @@ function seasonPanelChoice() {
 
     var placeholder = document.createElement('option');
     placeholder.value = '';
-    placeholder.text = 'Monitor :';
+    placeholder.text = 'Seasons :';
     placeholder.disabled = true;
     placeholder.selected = true;
     select.appendChild(placeholder);
