@@ -447,7 +447,6 @@ function createSonarrPanel(result) {
     headDiv.className = 'head';
     headDiv.textContent = 'Add To Sonarr';
     headDiv.style.fontWeight = 'bold';
-    headDiv.style.fontSize = '0.7rem';
     var sonarrPanelDiv = document.createElement('div');
     sonarrPanelDiv.id = 'SonarrPanel';
     sonarrPanelDiv.style.display = 'flex';
@@ -536,7 +535,7 @@ function rootProfileSpanelChoice() {
             });
 
             select.addEventListener('change', function() {
-                console.log('Selection made: ', this.value);
+                extendedroot = this.value;
             });
         }
     });
@@ -579,7 +578,6 @@ function panelProfileIdChoice() {
 
             select.addEventListener('change', function() {
                 extendedprofile = this.value;
-                console.log(extendedprofile);
             });
         }
     });
@@ -613,10 +611,9 @@ function seasonPanelChoice() {
     select.addEventListener('change', function() {
         if (this.value !== '') {
             extendedSeasonChoice = this.value;
-            console.log(extendedSeasonChoice);
-            placeholder.disabled = false; // Enable the placeholder
-            placeholder.selected = false; // Deselect the placeholder
-            this.options[this.selectedIndex].selected = true; // Select the chosen option
+            placeholder.disabled = false;
+            placeholder.selected = false;
+            this.options[this.selectedIndex].selected = true;
         }
     });
 }
@@ -641,28 +638,29 @@ function AddExtendedToSonarr(result) {
                             "Content-Type": "application/json",
                             "X-Api-Key": window.sonarrApi
                         },
-                        onload: function(response) {
-                            let jsonResponse = JSON.parse(response.responseText);
-                            console.log(JSON.stringify(jsonResponse, null, 2));
-                            window.sonarrResponse = jsonResponse;
+onload: function(response) {
+    let jsonResponse = JSON.parse(response.responseText);
+    window.sonarrResponse = jsonResponse;
 
-                            let fullPath = extendedroot + '/' + window.sonarrResponse[0].title;
-                            let seriesData = {
-                                title: window.sonarrResponse[0].title,
-                                seasons: window.sonarrResponse[0].seasons,
-                                path: fullPath,
-                                qualityProfileId: extendedprofile,
-                                languageProfileId: window.sonarrlanguageid,
-                                images: window.sonarrResponse[0].images,
-                                tvdbId: window.sonarrResponse[0].tvdbId,
-                                titleSlug: window.sonarrResponse[0].titleSlug,
-                                monitored: true,
-                                addOptions: {
-                                    ignoreEpisodesWithFiles: false,
-                                    ignoreEpisodesWithoutFiles: false,
-                                    searchForMissingEpisodes: window.sonarrsearch
-                                }
-                            };
+    let fullPath = extendedroot + '/' + window.sonarrResponse[0].title;
+
+    let seriesData = {
+        title: window.sonarrResponse[0].title,
+        seasons: window.sonarrResponse[0].seasons,
+        path: fullPath,
+        qualityProfileId: extendedprofile,
+        languageProfileId: window.sonarrlanguageid,
+        images: window.sonarrResponse[0].images,
+        tvdbId: window.sonarrResponse[0].tvdbId,
+        titleSlug: window.sonarrResponse[0].titleSlug,
+        monitored: true,
+        seasonFolder: true,
+        addOptions: {
+            ignoreEpisodesWithFiles: false,
+            ignoreEpisodesWithoutFiles: false,
+            searchForMissingEpisodes: window.sonarrsearch
+        }
+    };
 
                             if (extendedSeasonChoice === "NONE") {
                                 for (let i = 0; i < seriesData.seasons.length; i++) {
@@ -730,6 +728,7 @@ function addToSonarr(result) {
         tvdbId: result[0].tvdbId,
         titleSlug: result[0].titleSlug,
         monitored: true,
+        seasonFolder: true,
         addOptions: {
             ignoreEpisodesWithFiles: false,
             ignoreEpisodesWithoutFiles: false,
