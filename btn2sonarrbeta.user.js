@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         BTN 2 Sonarr
-// @version      1.5
+// @version      1.6
 // @description  Add shows directly to sonarr via the BTN tv show pages and V3 api.
 // @author       Prism16
 // @match        https://broadcasthe.net/series.php?id=*
@@ -436,6 +436,8 @@ function getTVDBIdAndPassToSonarr() {
     }
 }
 
+var confirmButton;
+
 function createSonarrPanel(result) {
     var settings = ['Path', 'Profile', 'Monitor'];
     var mainColumn = document.querySelector("#content > div.thin > div.main_column");
@@ -444,8 +446,8 @@ function createSonarrPanel(result) {
     var headDiv = document.createElement('div');
     headDiv.className = 'head';
     headDiv.textContent = 'Add To Sonarr';
-    headDiv.style.fontSize = '0.7rem';
     headDiv.style.fontWeight = 'bold';
+    headDiv.style.fontSize = '0.7rem';
     var sonarrPanelDiv = document.createElement('div');
     sonarrPanelDiv.id = 'SonarrPanel';
     sonarrPanelDiv.style.display = 'flex';
@@ -458,36 +460,19 @@ function createSonarrPanel(result) {
         settingDiv.style.display = 'flex';
         settingDiv.style.flexDirection = 'column';
         settingDiv.style.alignItems = 'center';
-        var label = document.createElement('label');
-        label.textContent = setting.toUpperCase();
-        label.style.fontSize = '14px';
-        label.style.marginRight = '20px';
-        label.style.marginTop = '12px';
+        settingDiv.style.margin = '10px 0';
         var select = document.createElement('select');
         select.id = setting;
-        select.addEventListener('click', function() {
-            switch(index) {
-                case 0:
-                    rootProfileSpanelChoice();
-                    break;
-                case 1:
-                    panelProfileIdChoice();
-                    break;
-                case 2:
-                    seasonPanelChoice();
-                    break;
-            }
-        });
-        settingDiv.appendChild(label);
         settingDiv.appendChild(select);
         sonarrPanelDiv.appendChild(settingDiv);
     });
 
-    var confirmButton = document.createElement('button');
+    confirmButton = document.createElement('button');
     confirmButton.textContent = 'Add';
     confirmButton.style.height = '30px';
     confirmButton.style.alignSelf = 'flex-end';
-    confirmButton.style.marginTop = '20px';
+    confirmButton.style.marginTop = '0px';
+    confirmButton.style.display = 'none';
     confirmButton.addEventListener('click', AddExtendedToSonarr);
 
     sonarrPanelDiv.appendChild(confirmButton);
@@ -495,6 +480,24 @@ function createSonarrPanel(result) {
     boxDiv.appendChild(headDiv);
     boxDiv.appendChild(sonarrPanelDiv);
     mainColumn.insertBefore(boxDiv, mainColumn.children[2]);
+
+    rootProfileSpanelChoice();
+    panelProfileIdChoice();
+    seasonPanelChoice();
+
+    document.getElementById('Path').addEventListener('change', checkSelections);
+    document.getElementById('Profile').addEventListener('change', checkSelections);
+    document.getElementById('Monitor').addEventListener('change', checkSelections);
+}
+
+function checkSelections() {
+    var path = document.getElementById('Path').value;
+    var profile = document.getElementById('Profile').value;
+    var monitor = document.getElementById('Monitor').value;
+
+    if (path && profile && monitor) {
+        confirmButton.style.display = 'block';
+    }
 }
 
 let extendedroot;
@@ -512,11 +515,15 @@ function rootProfileSpanelChoice() {
             let responseData = JSON.parse(response.responseText);
             let select = document.getElementById('Path');
 
+            if (select.options.length > 1) {
+                return;
+            }
+
             select.innerHTML = '';
 
             let placeholder = document.createElement('option');
             placeholder.value = '';
-            placeholder.text = 'Please Choose Below';
+            placeholder.text = 'Root Path :';
             placeholder.disabled = true;
             placeholder.selected = true;
             select.appendChild(placeholder);
@@ -529,38 +536,7 @@ function rootProfileSpanelChoice() {
             });
 
             select.addEventListener('change', function() {
-                extendedroot = this.value;
-                console.log(extendedroot);
-
-                placeholder.selected = false;
-
-                let element = document.querySelector("#content > div.thin > div.main_column > div:nth-child(3) > div.head");
-
-                let span = document.createElement('span');
-                span.style.color = '#afe4ee';
-                span.textContent = " " + this.options[this.selectedIndex].text;
-
-                element.innerHTML += " // Path = ";
-                element.appendChild(span);
-
-                select.style.transition = "opacity 1s ease-in-out";
-                select.style.opacity = 0;
-
-            let img = document.createElement('img');
-            img.src = 'https://ptpimg.me/24772c.png';
-            img.style.transition = "opacity 1s ease-in-out";
-            img.style.opacity = 0;
-            img.style.display = 'none';
-            img.style.width = '30px';
-            img.style.height = '30px';
-            img.style.marginLeft = '-12px';
-
-                select.parentNode.replaceChild(img, select);
-
-                setTimeout(function() {
-                    img.style.display = 'block';
-                    img.style.opacity = 1;
-                }, 1000);
+                console.log('Selection made: ', this.value);
             });
         }
     });
@@ -581,11 +557,15 @@ function panelProfileIdChoice() {
             let responseData = JSON.parse(response.responseText);
             let select = document.getElementById('Profile');
 
+            if (select.options.length > 1) {
+                return;
+            }
+
             select.innerHTML = '';
 
             let placeholder = document.createElement('option');
             placeholder.value = '';
-            placeholder.text = 'Please Choose Below';
+            placeholder.text = 'Profile :';
             placeholder.disabled = true;
             placeholder.selected = true;
             select.appendChild(placeholder);
@@ -600,32 +580,6 @@ function panelProfileIdChoice() {
             select.addEventListener('change', function() {
                 extendedprofile = this.value;
                 console.log(extendedprofile);
-
-                let element = document.querySelector("#content > div.thin > div.main_column > div:nth-child(3) > div.head");
-                let span = document.createElement('span');
-                span.style.color = '#afe4ee';
-                span.textContent = " " + this.options[this.selectedIndex].text;
-                element.innerHTML += " // Profile = ";
-                element.appendChild(span);
-
-                select.style.transition = "opacity 1s ease-in-out";
-                select.style.opacity = 0;
-
-            let img = document.createElement('img');
-            img.src = 'https://ptpimg.me/24772c.png';
-            img.style.transition = "opacity 1s ease-in-out";
-            img.style.opacity = 0;
-            img.style.display = 'none';
-            img.style.width = '30px';
-            img.style.height = '30px';
-            img.style.marginLeft = '-12px';
-
-                select.parentNode.replaceChild(img, select);
-
-                setTimeout(function() {
-                    img.style.display = 'block';
-                    img.style.opacity = 1;
-                }, 1000);
             });
         }
     });
@@ -642,7 +596,7 @@ function seasonPanelChoice() {
 
     var placeholder = document.createElement('option');
     placeholder.value = '';
-    placeholder.text = 'Please Choose Below';
+    placeholder.text = 'Monitor :';
     placeholder.disabled = true;
     placeholder.selected = true;
     select.appendChild(placeholder);
@@ -660,32 +614,9 @@ function seasonPanelChoice() {
         if (this.value !== '') {
             extendedSeasonChoice = this.value;
             console.log(extendedSeasonChoice);
-
-            let element = document.querySelector("#content > div.thin > div.main_column > div:nth-child(3) > div.head");
-            let span = document.createElement('span');
-            span.style.color = '#afe4ee';
-            span.textContent = " " + this.options[this.selectedIndex].text;
-            element.innerHTML += " // Monitor = ";
-            element.appendChild(span);
-
-            select.style.transition = "opacity 1s ease-in-out";
-            select.style.opacity = 0;
-
-            let img = document.createElement('img');
-            img.src = 'https://ptpimg.me/24772c.png';
-            img.style.transition = "opacity 1s ease-in-out";
-            img.style.opacity = 0;
-            img.style.display = 'none';
-            img.style.width = '30px';
-            img.style.height = '30px';
-            img.style.marginLeft = '-12px';
-
-            select.parentNode.replaceChild(img, select);
-
-            setTimeout(function() {
-                img.style.display = 'block';
-                img.style.opacity = 1;
-            }, 1000);
+            placeholder.disabled = false; // Enable the placeholder
+            placeholder.selected = false; // Deselect the placeholder
+            this.options[this.selectedIndex].selected = true; // Select the chosen option
         }
     });
 }
